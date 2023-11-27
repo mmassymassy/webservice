@@ -1,6 +1,9 @@
 package classes;
 
-import shared.*;
+import shared.IEtudiant;
+import shared.IHoraire;
+import shared.ITuteur;
+import shared.Utilisateur;
 
 import java.io.Serializable;
 import java.rmi.RemoteException;
@@ -52,12 +55,23 @@ public class Tuteur extends Utilisateur implements Serializable,ITuteur {
 
     // Méthode pour associer un étudiant au tuteur
     public void associerEtudiant(IHoraire h,IEtudiant etudiant, String matiere) throws RemoteException {
+        System.out.println("L'étudiant " + etudiant.getNom() + " souhaite être associé au tuteur " + this.getNom());
+        if(etudiantsAssociés.get(etudiant.getEmail()) != null){
+            System.out.println("L'étudiant " + etudiant.getNom() + " est dèja associé au tuteur " + this.getNom());
+            return;
+        }
+        if(listeAttente.contains(etudiant)){
+            System.out.println("L'étudiant " + etudiant.getNom() + " est dèja dans la liste d'attente  de tuteur " + this.getNom());
+            return;
+        }
         if (h.estDisponible()){ //si l'horaire est disponible
+            System.out.println("L'horaire est disponible");
             h.setMatiere(matiere); //definir la matiere associé au chréno
             h.setIndisponible();  //marquer l'horaire cm indisponible
             etudiantsAssociés.put(h,etudiant); //affecter l'etudiant au tuteur
             System.out.println("L'étudiant " + etudiant.getNom() + " est associé au tuteur " + this.getNom()+" pour la matiere "+h.getMatiere());
         }else{
+            System.out.println("L'horaire n'est pas disponible");
             listeAttente.add(etudiant);
             System.out.println("L'étudiant " + etudiant.getNom() + " est en attente de tuteur " + this.getNom());
         }
@@ -71,6 +85,7 @@ public class Tuteur extends Utilisateur implements Serializable,ITuteur {
 
     // Méthode pour libérer le tuteur et indiquer qu'il est disponible
     public void libererTuteurParHoraire(IHoraire h) throws RemoteException {
+        System.out.println("Le tuteur " + this.getNom() + " est libéré pour le " + h.getDate());
         etudiantsAssociés.remove(h);
         h.setDisponible();
         this.notifierEtudiants(h);
